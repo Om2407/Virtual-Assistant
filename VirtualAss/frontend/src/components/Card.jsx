@@ -1,44 +1,24 @@
-import axios from 'axios'
-import React, { createContext, useEffect, useState } from 'react'
-export const userDataContext=createContext()
-function UserContext({children}) {
-    const serverUrl="http://localhost:8000"
-    const [userData,setUserData]=useState(null)
-    const [frontendImage,setFrontendImage]=useState(null)
-     const [backendImage,setBackendImage]=useState(null)
-     const [selectedImage,setSelectedImage]=useState(null)
-    const handleCurrentUser=async ()=>{
-        try {
-            const result=await axios.get(`${serverUrl}/api/user/current`,{withCredentials:true})
-            setUserData(result.data)
-            console.log(result.data)
-        } catch (error) {
-            console.log(error)
-        }
-    }
+import React, { useContext } from "react";
+import { userDataContext } from "../context/userContext";
 
-    const getGeminiResponse=async (command)=>{
-try {
-  const result=await axios.post(`${serverUrl}/api/user/asktoassistant`,{command},{withCredentials:true})
-  return result.data
-} catch (error) {
-  console.log(error)
-}
-    }
+function Card({ image }) {
+  const { selectedImage, setSelectedImage, backendImage, setBackendImage, frontendImage, setFrontendImage } =
+    useContext(userDataContext);
 
-    useEffect(()=>{
-handleCurrentUser()
-    },[])
-    const value={
-serverUrl,userData,setUserData,backendImage,setBackendImage,frontendImage,setFrontendImage,selectedImage,setSelectedImage,getGeminiResponse
-    }
   return (
-    <div>
-    <userDataContext.Provider value={value}>
-      {children}
-      </userDataContext.Provider>
+    <div
+      className={`w-[70px] h-[140px] lg:w-[150px] lg:h-[250px] bg-[#020220] border-2 border-[#0000ff66] rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-blue-950 cursor-pointer hover:border-4 hover:border-white ${
+        selectedImage === image ? "border-4 border-white shadow-2xl shadow-blue-950 " : ""
+      }`}
+      onClick={() => {
+        setSelectedImage(image);
+        setBackendImage(null);
+        setFrontendImage(null);
+      }}
+    >
+      <img src={image} className="h-full object-cover" />
     </div>
-  )
+  );
 }
 
-export default UserContext
+export default Card;

@@ -1,22 +1,29 @@
 import { v2 as cloudinary } from 'cloudinary';
-import fs from "fs"
-const uploadOnCloudinary =async (filePath)=>{
-     cloudinary.config({ 
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-        api_key: process.env.CLOUDINARY_API_KEY, 
-        api_secret: process.env.CLOUDINARY_API_SECRET 
-    });
+import fs from "fs";
 
+// Cloudinary config ek baar server start me
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET 
+});
+
+const uploadOnCloudinary = async (filePath) => {
     try {
-        const uploadResult = await cloudinary.uploader
-       .upload(filePath)
-       fs.unlinkSync(filePath)
-       return uploadResult.secure_url
+        const uploadResult = await cloudinary.uploader.upload(filePath);
+        
+        // File delete safe way
+        try {
+            fs.unlinkSync(filePath);
+        } catch (err) {
+            console.error("Error deleting temp file:", err);
+        }
+
+        return uploadResult.secure_url;
     } catch (error) {
-    fs.unlinkSync(filePath)
-    return res.status(500).json({message:"cloudinary error"})
+        console.error("Cloudinary upload error:", error);
+        throw new Error("Cloudinary upload failed"); // Throw error instead of using res
     }
-}
+};
 
-
-export default uploadOnCloudinary
+export default uploadOnCloudinary;
